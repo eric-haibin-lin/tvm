@@ -63,6 +63,24 @@ inline int ColumnCount(DLTensor *tensor, bool trans) {
   return tensor->shape[trans ? 0 : 1];
 }
 
+// Call a math routine.
+template <typename TMathOp>
+inline void CallErf(TVMArgs args, TVMRetValue *ret, TMathOp op) {
+  DLTensor *A = args[0];
+  DLTensor *C = args[1];
+  CHECK_GT(A->ndim, 0);
+  int size = 1;
+  for (int i = 0; i < A->ndim; i++) {
+    size *= A->shape[i];
+  }
+  // CHECK_EQ(ElementStride(A), 1);
+  // Reversed strides indicates an in-place transpose operation.
+  // transa = IsInPlaceTransposed(A) ? !transa : transa;
+
+  op(size, reinterpret_cast<typename TMathOp::TDatatype *>(A->data),
+     reinterpret_cast<typename TMathOp::TDatatype *>(C->data));
+}
+
 // Call a column major blas.  Note that data is stored in tvm as row
 // major, so this we switch the arguments.
 template <typename TGemmOp>

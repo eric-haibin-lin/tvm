@@ -28,6 +28,7 @@
 extern "C" {
 #if USE_MKL_BLAS == 1
 #include <mkl_cblas.h>
+#include "mkl_vml.h"
 #else
 #include <cblas.h>
 #endif
@@ -158,6 +159,21 @@ struct CblasDgemmBatchIterativeOp {
   }
 };
 
+struct CblasErfDOp {
+  typedef double TDatatype;
+  void operator()(int n, TDatatype* a, TDatatype* y) {
+    vdErf(n, a, y);
+  }
+};
+
+
+struct CblasErfSOp {
+  typedef float TDatatype;
+  void operator()(int n, TDatatype* a, TDatatype* y) {
+    vsErf(n, a, y);
+  }
+};
+
 // matrix multiplication for row major
 TVM_REGISTER_GLOBAL("tvm.contrib.cblas.matmul")
 .set_body([](TVMArgs args, TVMRetValue* ret) {
@@ -191,5 +207,18 @@ TVM_REGISTER_GLOBAL("tvm.contrib.cblas.batch_matmul_iterative")
     CallBatchGemm(args, ret, CblasDgemmBatchIterativeOp());
   }
 });
+
+// erf
+TVM_REGISTER_GLOBAL("tvm.contrib.cblas.erf")
+.set_body([](TVMArgs args, TVMRetValue* ret) {
+  DLTensor* A = args[0];
+  CHECK(TypeMatch(A->dtype, kDLFloat, 32) || TypeMatch(A->dtype, kDLFloat, 64));
+  if (TypeMatch(A->dtype, kDLFloat, 32)) {
+    CallErf(args, ret, CblasErfSOp());
+  } else {
+    CallErf(args, ret, CblasErfDOp());
+  }
+});
+
 }  // namespace contrib
 }  // namespace tvm

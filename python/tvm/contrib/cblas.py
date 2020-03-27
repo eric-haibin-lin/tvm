@@ -20,7 +20,7 @@ from tvm import te
 
 
 def matmul(lhs, rhs, transa=False, transb=False, **kwargs):
-    """Create an extern op that compute matrix mult of A and rhs with CrhsLAS
+    """Create an extern op that compute matrix mult of lhs and rhs with CBLAS
     This function serves as an example on how to call external libraries.
 
     Parameters
@@ -53,7 +53,7 @@ def matmul(lhs, rhs, transa=False, transb=False, **kwargs):
 
 
 def batch_matmul(lhs, rhs, transa=False, transb=False, iterative=False, **kwargs):
-    """Create an extern op that compute batched matrix mult of A and rhs with CBLAS
+    """Create an extern op that compute batched matrix mult of lhs and rhs with CBLAS
     This function serves as an example on how to call external libraries.
 
     Parameters
@@ -91,3 +91,30 @@ def batch_matmul(lhs, rhs, transa=False, transb=False, iterative=False, **kwargs
         name="C",
         **kwargs
     )
+
+def erf(lhs, **kwargs):
+    """Create an extern op that compute erf A
+
+    Parameters
+    ----------
+    lhs: Tensor
+        The input matrix
+
+    Returns
+    -------
+    C: Tensor
+        The result tensor.
+    """
+    size = 1
+    for s in lhs.shape:
+        size *= s
+    return te.extern(
+        (s),
+        [lhs],
+        lambda ins, outs: tvm.tir.call_packed(
+            "tvm.contrib.cblas.erf", ins[0], outs[0]
+        ),
+        name="C",
+        **kwargs
+    )
+

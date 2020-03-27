@@ -232,7 +232,24 @@ def dense_cblas(cfg, data, weight, bias=None, out_dtype=None):
                        tag=tag.BROADCAST)
     return C
 
+@autotvm.register_topi_compute("erf_cblas.x86")
+def erf_cblas(cfg, data):
+    """Compute erf using cblas library"""
+    shape = get_const_tuple(data.shape)
+    total_count = 1
+    for s in shape:
+        total_count *= s
+    # TODO: this may not be accurate
+    cfg.add_flop(s)
+    C = cblas.erf(data)
+    return C
+
 @autotvm.register_topi_schedule("dense_cblas.x86")
 def schedule_dense_cblas(_, outs):
     """Create schedule for dense_cblas"""
+    return generic.schedule_extern(outs)
+
+@autotvm.register_topi_schedule("erf_cblas.x86")
+def schedule_erf_cblas(_, outs):
+    """Create schedule for erf_cblas"""
     return generic.schedule_extern(outs)
