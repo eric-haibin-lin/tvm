@@ -37,33 +37,6 @@ from ..environment import get_env
 # override to force partition at copy
 reg.register_pattern("copy", OpPattern.INJECTIVE, level=15)
 
-# add erf cpu strategy
-def compute_erf_cpu(attrs, inputs, output_type):
-    """ Erf operator. """
-    x = inputs[0]
-    with tvm.te.tag_scope(topi.tag.ELEMWISE):
-        x = te.compute(
-            x.shape, lambda *i: tvm.te.erf(x(*i)), name="erf")
-    return [x]
-
-def erf_strategy_cpu(attrs, inputs, out_type, target):
-    strategy = OpStrategy()
-    raise Exception('err')
-    strategy.add_implementation(
-        compute_erf_cpu,
-        _strategy.wrap_topi_schedule(topi.generic.schedule_injective),
-        name="erf.cpu",
-        plevel=10)
-
-    if "cblas" in target.libs:
-        strategy.add_implementation(wrap_compute_dense(topi.x86.erf_cblas),
-                                    wrap_topi_schedule(topi.x86.schedule_erf_cblas),
-                                    name="erf_cblas.x86",
-                                    plevel=15)
-    return strategy
-
-reg.get("erf").get_attr("FTVMStrategy").register(erf_strategy_cpu, "cpu", allow_override=True)
-
 # add clip vta strategy
 def compute_clip_vta(attrs, inputs, output_type):
     """ Clip operator. """

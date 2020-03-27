@@ -24,7 +24,7 @@ from topi.util import get_const_tuple
 from tvm.runtime import convert
 from .. import op as reg
 from .. import strategy
-from ..op import OpPattern
+from ..op import OpPattern, OpStrategy
 from .._tensor import elemwise_shape_func
 from ....hybrid import script
 
@@ -636,3 +636,24 @@ def pad_shape_func(attrs, inputs, _):
 reg.register_shape_func("nn.bias_add", False, elemwise_shape_func)
 reg.register_shape_func("nn.softmax", False, elemwise_shape_func)
 reg.register_shape_func("nn.relu", False, elemwise_shape_func)
+
+# erf
+def wrap_compute_erf(topi_compute):
+    """wrap erf topi compute"""
+    def _compute_erf(attrs, inputs, out_type):
+        """Compute definition of erf"""
+        return [topi_compute(inputs[0], None, out_type)]
+    return _compute_erf
+
+def erf_strategy_cpu(attrs, inputs, out_type, target):
+    op_strategy = OpStrategy()
+    if "cblas" in target.libs:
+        op_strategy.add_implementation(wrap_compute_erf(topi.x86.erf_cblas),
+                                      strategy.wrap_topi_schedule(topi.x86.schedule_erf_cblas),
+                                      name="erf_cblas.x86",
+                                      plevel=15)
+    else:
+        raise Exception('error')
+    return op_strategy
+
+reg.get("erf").get_attr("FTVMStrategy").register(erf_strategy_cpu, "cpu", allow_override=True)

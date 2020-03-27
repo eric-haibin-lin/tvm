@@ -159,7 +159,7 @@ struct CblasDgemmBatchIterativeOp {
   }
 };
 
-struct CblasErfDOp {
+struct CblasDErfOp {
   typedef double TDatatype;
   void operator()(int n, TDatatype* a, TDatatype* y) {
     vdErf(n, a, y);
@@ -167,7 +167,7 @@ struct CblasErfDOp {
 };
 
 
-struct CblasErfSOp {
+struct CblasSErfOp {
   typedef float TDatatype;
   void operator()(int n, TDatatype* a, TDatatype* y) {
     vsErf(n, a, y);
@@ -214,9 +214,9 @@ TVM_REGISTER_GLOBAL("tvm.contrib.cblas.erf")
   DLTensor* A = args[0];
   CHECK(TypeMatch(A->dtype, kDLFloat, 32) || TypeMatch(A->dtype, kDLFloat, 64));
   if (TypeMatch(A->dtype, kDLFloat, 32)) {
-    CallErf(args, ret, CblasErfSOp());
+    CallErf(args, ret, CblasSErfOp());
   } else {
-    CallErf(args, ret, CblasErfDOp());
+    CallErf(args, ret, CblasDErfOp());
   }
 });
 

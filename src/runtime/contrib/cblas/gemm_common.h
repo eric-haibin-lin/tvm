@@ -64,6 +64,7 @@ inline int ColumnCount(DLTensor *tensor, bool trans) {
 }
 
 // Call a math routine.
+// TODO: handle stride?
 template <typename TMathOp>
 inline void CallErf(TVMArgs args, TVMRetValue *ret, TMathOp op) {
   DLTensor *A = args[0];
@@ -73,10 +74,6 @@ inline void CallErf(TVMArgs args, TVMRetValue *ret, TMathOp op) {
   for (int i = 0; i < A->ndim; i++) {
     size *= A->shape[i];
   }
-  // CHECK_EQ(ElementStride(A), 1);
-  // Reversed strides indicates an in-place transpose operation.
-  // transa = IsInPlaceTransposed(A) ? !transa : transa;
-
   op(size, reinterpret_cast<typename TMathOp::TDatatype *>(A->data),
      reinterpret_cast<typename TMathOp::TDatatype *>(C->data));
 }

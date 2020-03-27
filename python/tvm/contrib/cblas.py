@@ -105,11 +105,8 @@ def erf(lhs, **kwargs):
     C: Tensor
         The result tensor.
     """
-    size = 1
-    for s in lhs.shape:
-        size *= s
     return te.extern(
-        (s),
+        (lhs.shape,),
         [lhs],
         lambda ins, outs: tvm.tir.call_packed(
             "tvm.contrib.cblas.erf", ins[0], outs[0]
@@ -117,4 +114,3 @@ def erf(lhs, **kwargs):
         name="C",
         **kwargs
     )
-
