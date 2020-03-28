@@ -987,7 +987,20 @@ def test_forward_gelu():
     data = mx.sym.var('data')
     data = mx.sym.concat(data, -data, dim=1)  # negative part explicitly
     mx_sym = mx.sym.LeakyReLU(data, act_type='gelu')
-    verify_mxnet_frontend_impl(mx_sym, (1, 3, 100, 100), (1, 6, 100, 100))
+
+    def verify(data_shape):
+        data = mx.sym.var('x')
+        x = np.random.uniform(size=data_shape).astype("float32")
+        ref_res = mx.nd.LeakyReLU(data=mx.nd.array(x), act_type='gelu')
+        mx_sym = mx.sym.LeakyReLU(data, act_type='gelu')
+        shape_dict = {"x": x.shape}
+        mod, _ = relay.frontend.from_mxnet(mx_sym, shape_dict)
+        for target, ctx in ctx_list():
+            intrp = relay.create_executor('graph', mod=mod, ctx=ctx, target=target)
+            op_res = intrp.evaluate()(x)
+            tvm.testing.assert_allclose(op_res.asnumpy(), ref_res.asnumpy(), rtol=1e-3, atol=1e-5)
+
+    verify(data_shape=(20, 1, 32, 32))
 
 if __name__ == '__main__':
     test_forward_mlp()
