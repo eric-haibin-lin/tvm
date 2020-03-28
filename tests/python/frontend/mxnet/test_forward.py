@@ -983,6 +983,12 @@ def test_forward_erf():
 
     verify(data_shape=(3, 4, 5))
 
+def test_forward_gelu():
+    data = mx.sym.var('data')
+    data = mx.sym.concat(data, -data, dim=1)  # negative part explicitly
+    mx_sym = mx.sym.LeakyReLU(data, act_type='gelu')
+    verify_mxnet_frontend_impl(mx_sym, (1, 3, 100, 100), (1, 6, 100, 100))
+
 if __name__ == '__main__':
     test_forward_mlp()
     test_forward_vgg()

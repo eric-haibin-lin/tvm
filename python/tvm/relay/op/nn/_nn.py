@@ -651,7 +651,7 @@ def wrap_compute_erf(topi_compute):
     """wrap erf topi compute"""
     def _compute_erf(attrs, inputs, out_type):
         """Compute definition of erf"""
-        return [topi_compute(inputs[0], None, out_type)]
+        return [topi_compute(inputs[0])]
     return _compute_erf
 
 def erf_strategy_cpu(attrs, inputs, out_type, target):

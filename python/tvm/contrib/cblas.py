@@ -106,7 +106,7 @@ def erf(lhs, **kwargs):
         The result tensor.
     """
     return te.extern(
-        (lhs.shape,),
+        lhs.shape,
         [lhs],
         lambda ins, outs: tvm.tir.call_packed(
             "tvm.contrib.cblas.erf", ins[0], outs[0]
