@@ -1805,6 +1805,7 @@ _identity_list = [
 _convert_map = {
     "_copy"                  : _rename(_op.copy),
     "relu"                   : _rename(_op.nn.relu),
+    "erf"                    : _rename(_op.erf),
     "broadcast_add"          : _rename(_op.add),
     "broadcast_sub"          : _rename(_op.subtract),
     "broadcast_mul"          : _rename(_op.multiply),

@@ -637,6 +637,15 @@ reg.register_shape_func("nn.bias_add", False, elemwise_shape_func)
 reg.register_shape_func("nn.softmax", False, elemwise_shape_func)
 reg.register_shape_func("nn.relu", False, elemwise_shape_func)
 
+import tvm
+def compute_erf(attrs, inputs, output_type):
+    """ Erf operator. """
+    x = inputs[0]
+    with tvm.te.tag_scope(topi.tag.ELEMWISE):
+        x = tvm.te.compute(
+            x.shape, lambda *i: tvm.te.erf(x(*i)), name="erf")
+    return [x]
+
 # erf
 def wrap_compute_erf(topi_compute):
     """wrap erf topi compute"""
@@ -647,13 +656,15 @@ def wrap_compute_erf(topi_compute):
 
 def erf_strategy_cpu(attrs, inputs, out_type, target):
     op_strategy = OpStrategy()
+    op_strategy.add_implementation(
+        compute_erf,
+        strategy.wrap_topi_schedule(topi.generic.schedule_injective),
+        name="erf.generic")
     if "cblas" in target.libs:
         op_strategy.add_implementation(wrap_compute_erf(topi.x86.erf_cblas),
-                                      strategy.wrap_topi_schedule(topi.x86.schedule_erf_cblas),
-                                      name="erf_cblas.x86",
-                                      plevel=15)
-    else:
-        raise Exception('error')
+                                       strategy.wrap_topi_schedule(topi.x86.schedule_erf_cblas),
+                                       name="erf_cblas.x86",
+                                       plevel=15)
     return op_strategy
 
 reg.get("erf").get_attr("FTVMStrategy").register(erf_strategy_cpu, "cpu", allow_override=True)

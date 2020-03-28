@@ -971,6 +971,17 @@ def test_forward_arange_like():
 
     verify(data_shape=(3, 4, 5), start=0., step=1.,  axis=-1)
 
+def test_forward_erf():
+    def verify(data_shape):
+        data = mx.sym.var('data')
+        data_np = np.random.uniform(size=data_shape).astype("float32")
+
+        mx_sym = mx.sym.erf(data)
+        mod, _ = relay.frontend.from_mxnet(mx_sym, {"data": data_shape})
+        print(mod)
+        verify_mxnet_frontend_impl(mx_sym, data_shape=data_shape, out_shape=data_shape)
+
+    verify(data_shape=(3, 4, 5))
 
 if __name__ == '__main__':
     test_forward_mlp()
