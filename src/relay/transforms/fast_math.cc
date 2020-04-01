@@ -35,15 +35,12 @@ class FastMathMutator : public ExprMutator {
  public:
   FastMathMutator()
       : exp_op_(Op::Get("exp")),
-        erf_op_(Op::Get("erf")),
         tanh_op_(Op::Get("tanh")) {}
 
   Expr VisitExpr_(const CallNode* n) {
     auto new_n = ExprMutator::VisitExpr_(n);
     if (n->op == exp_op_) {
       return FastExp(new_n.as<CallNode>()->args[0]);
-    } else if (n->op == erf_op_) {
-      return FastErf(new_n.as<CallNode>()->args[0]);
     } else if (n->op == tanh_op_) {
       return FastTanh(new_n.as<CallNode>()->args[0]);
     }
@@ -55,7 +52,6 @@ class FastMathMutator : public ExprMutator {
   // operator equivalence checking so that the registry lookup overhead can be
   // reduced.
   const Op& exp_op_;
-  const Op& erf_op_;
   const Op& tanh_op_;
 };
 
