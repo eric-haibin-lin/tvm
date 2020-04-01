@@ -949,7 +949,6 @@ def test_forward_cond():
     verify(np.asarray([4.0], 'float32'), np.asarray([3.0],'float32'))
 
 
-<<<<<<< HEAD
 def test_forward_arange_like():
     def verify(data_shape, start=None, step=None, axis=None):
         attrs = {}
@@ -962,13 +961,10 @@ def test_forward_arange_like():
         print(attrs)
         data = mx.sym.var('data')
         data_np = np.random.uniform(size=data_shape).astype("float32")
-        #ref_res = mx.nd.contrib.arange_like(mx.nd.array(data_np), **attrs)
-        #print(ref_res)
-        
+
         mx_sym = mx.sym.contrib.arange_like(data, **attrs)
         mod, _ = relay.frontend.from_mxnet(mx_sym, {"data": data_shape})
-        print(mod)
-        #verify_mxnet_frontend_impl(mx_sym, data_shape=data_shape, out_shape=data_shape)
+        verify_mxnet_frontend_impl(mx_sym, data_shape=data_shape, out_shape=data_shape)
 
     verify(data_shape=(3, 4, 5), start=0., step=1.,  axis=-1)
 
@@ -978,7 +974,7 @@ def test_forward_gelu():
     data = mx.sym.concat(data, -data, dim=1)  # negative part explicitly
     mx_sym = mx.sym.LeakyReLU(data, act_type='gelu')
     verify_mxnet_frontend_impl(mx_sym, (1, 3, 100, 100), (1, 6, 100, 100))
-=======
+
 def test_forward_unravel_index():
     def verify(x, shape, dtype):
         a_np = np.array(x).astype(dtype)

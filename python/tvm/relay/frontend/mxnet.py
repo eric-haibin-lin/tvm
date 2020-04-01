@@ -2077,7 +2077,6 @@ def _from_mxnet_impl(symbol, shape_dict, dtype_info, params=None, mod=None):
                 raise RuntimeError("unexpected type %s" % type(res))
             node_map[nid] = res
         else:
-            print(node)
             raise tvm.error.OpNotImplemented(
                 'Operator {} is not supported in frontend MXNet.'.format(op_name))
 
