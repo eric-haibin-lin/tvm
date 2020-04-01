@@ -972,6 +972,12 @@ def test_forward_arange_like():
     verify(data_shape=(3, 4, 5), start=0., step=1.,  axis=-1)
 
 
+def test_forward_gelu():
+    data = mx.sym.var('data')
+    data = mx.sym.concat(data, -data, dim=1)  # negative part explicitly
+    mx_sym = mx.sym.LeakyReLU(data, act_type='gelu')
+    verify_mxnet_frontend_impl(mx_sym, (1, 3, 100, 100), (1, 6, 100, 100))
+
 if __name__ == '__main__':
     test_forward_mlp()
     test_forward_vgg()
@@ -1028,3 +1034,4 @@ if __name__ == '__main__':
     test_forward_cond()
     test_forward_make_loss()
     test_forward_arange_like()
+    test_forward_gelu()
