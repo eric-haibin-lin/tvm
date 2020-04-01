@@ -219,6 +219,19 @@ def DeadCodeElimination(inline_once=False):
     """
     return _ffi_api.DeadCodeElimination(inline_once)
 
+def LazyGradientInit():
+    """Reduces memory usage of gradient tensors
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+    ret: tvm.relay.Pass
+        A pass which delays and/or reduces memory allocation,
+        by lazily allocating 0 or one filled tensors.
+    """
+    return _ffi_api.LazyGradientInit()
 
 def FoldConstant():
     """Fold the constant expressions in a Relay program.
@@ -382,6 +395,17 @@ def MergeComposite(pattern_table):
         patterns.append(pattern)
 
     return _ffi_api.MergeComposite(pattern_names, patterns)
+
+
+def MergeCompilerRegions():
+    """Merge together compiler regions.
+
+    Returns
+    -------
+    ret : tvm.relay.Pass
+        The registered pass that merges compiler regions.
+    """
+    return _ffi_api.MergeCompilerRegions()
 
 
 def RewriteAnnotatedOps(fallback_device):

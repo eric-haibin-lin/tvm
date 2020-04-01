@@ -148,7 +148,7 @@ set(USE_NNPACK OFF)
 # Possible values:
 # - ON: enable tflite with cmake's find search
 # - OFF: disable tflite
-# - /path/to/libtensorflow-lite.a: use specific path to tensorflow lite library 
+# - /path/to/libtensorflow-lite.a: use specific path to tensorflow lite library
 set(USE_TFLITE OFF)
 
 # /path/to/tensorflow: tensorflow root path when use tflite library
@@ -191,10 +191,10 @@ set(USE_ANTLR OFF)
 set(USE_RELAY_DEBUG OFF)
 
 # Whether to build fast VTA simulator driver
-set(USE_VTA_FSIM ON)
+set(USE_VTA_FSIM OFF)
 
 # Whether to build cycle-accurate VTA simulator driver
-set(USE_VTA_TSIM ON)
+set(USE_VTA_TSIM OFF)
 
 # Whether to build VTA FPGA driver (device side only)
 set(USE_VTA_FPGA OFF)

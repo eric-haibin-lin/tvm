@@ -105,6 +105,36 @@ def _slice():
         return _op.transform.strided_slice(data, begin, end, strides)
     return _impl
 
+def _split():
+    def _impl(inputs, input_types):
+        data = inputs[0]
+        split_size = int(inputs[1])
+        dim = int(inputs[2])
+
+        split_index = split_size
+        indices = []
+        while split_index < _infer_shape(data)[dim]:
+            indices.append(split_index)
+            split_index += split_size
+
+        return _op.split(data, indices, dim)
+    return _impl
+
+def _split_with_sizes():
+    def _impl(inputs, inputs_types):
+        data = inputs[0]
+        dim = int(inputs[2])
+
+        split_index = 0
+        indices = []
+        sections = _infer_shape(inputs[1])
+        for i in range(len(sections) - 1):
+            split_index += sections[i]
+            indices.append(split_index)
+
+        return _op.split(data, indices, dim)
+    return _impl
+
 def _select():
     def _impl(inputs, input_types):
         data = inputs[0]
@@ -213,10 +243,31 @@ def _maxpool_2d():
         pool_size = _infer_shape(inputs[1])
         strides = _infer_shape(inputs[2])
         padding = _infer_shape(inputs[3])
-
+        dilation = _infer_shape(inputs[4])
         ceil_mode = int(inputs[5])
 
+        if dilation != (1, 1):
+            msg = "MaxPool2d with dilation %s is not implemented" % (str(dilation), )
+            raise NotImplementedError(msg)
+
         return _op.nn.max_pool2d(data, pool_size, strides, padding, "NCHW", ceil_mode)
+    return _impl
+
+def _maxpool_1d():
+    def _impl(inputs, input_types):
+        data = inputs[0]
+
+        pool_size = _infer_shape(inputs[1])
+        strides = _infer_shape(inputs[2])
+        padding = _infer_shape(inputs[3])
+        dilation = _infer_shape(inputs[4])
+        ceil_mode = int(inputs[5])
+
+        if dilation != (1,):
+            msg = "MaxPool1d with dilation %s is not implemented" % (str(dilation), )
+            raise NotImplementedError(msg)
+
+        return _op.nn.max_pool1d(data, pool_size, strides, padding, "NCW", ceil_mode)
     return _impl
 
 def _hardtanh():
@@ -230,7 +281,7 @@ def _hardtanh():
 def _convolution():
     def _impl(inputs, input_types):
         # Use transpose or normal
-        use_transpose = True if inputs[6] == "1" else False
+        use_transpose = True if inputs[6] == 1 else False
 
         data = inputs[0]
         weight = inputs[1]
@@ -247,10 +298,19 @@ def _convolution():
         else:
             assert "data type {} could not be parsed in conv op" % (type(weight))
 
+        # Transposed convolutions have IOHW layout.
+        if use_transpose:
+            weight_shape[0], weight_shape[1] = weight_shape[1], weight_shape[0]
+
         channels = weight_shape[0]
         groups = int(inputs[8])
 
-        if groups > 1:
+        # Check if this is depth wise convolution
+        # We need to reshape weight so that Relay could recognize this is depth wise
+        # weight_shape[1] is always in_channels // groups
+        # For depthwise, in_channels == groups, so weight_shape[1] == 1
+        # If groups > 1 but weight_shape[1] != 1, this is group convolution
+        if groups > 1 and weight_shape[1] == 1:
             channel_multiplier = channels // groups
             new_weight_shape = (groups, channel_multiplier, weight_shape[2], weight_shape[3])
             weight = _op.transform.reshape(weight, new_weight_shape)
@@ -856,6 +916,8 @@ _convert_map = {
     "aten::unsqueeze"                       : _unsqueeze(),
     "aten::cat"                             : _concatenate(),
     "aten::slice"                           : _slice(),
+    "aten::split"                           : _split(),
+    "aten::split_with_sizes"                : _split_with_sizes(),
     "aten::select"                          : _select(),
     "aten::relu"                            : _relu(),
     "aten::relu_"                           : _relu(),
@@ -863,6 +925,7 @@ _convert_map = {
     "aten::adaptive_max_pool2d"             : _adaptive_max_pool_2d(),
     "aten::max_pool2d"                      : _maxpool_2d(),
     "aten::max_pool2d_with_indices"         : _maxpool_2d(),
+    "aten::max_pool1d"                      : _maxpool_1d(),
     "aten::hardtanh"                        : _hardtanh(),
     "aten::hardtanh_"                       : _hardtanh(),
     "aten::_convolution"                    : _convolution(),
@@ -1384,6 +1447,10 @@ def from_pytorch(script_module, input_shapes, custom_convert_map=None):
 
     ret = convert_operators(_get_operator_nodes(graph.nodes()), outputs,
                             output_index_map, ret_name)
+
+    if isinstance(ret[0], list):
+        ret[0] = _expr.Tuple(ret[0])
+
     func = tvm.relay.Function(_analysis.free_vars(ret[0]), ret[0])
 
     return _module.IRModule.from_expr(func), tvm_params

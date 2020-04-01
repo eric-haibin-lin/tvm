@@ -54,8 +54,6 @@ runtime::Module BuildForIRModule(const IRModule& module,
   return (*bf)(module, target->str());
 }
 
-
-
 // convert legacy LoweredFunc to PrimFunc.
 tir::PrimFunc ToPrimFunc(tir::LoweredFunc from) {
   // remap args to attach type annotations.
@@ -309,6 +307,9 @@ TVM_REGISTER_GLOBAL("target.Build")
       *ret = Build(args[0], args[1]);
     }
   });
+
+TVM_REGISTER_GLOBAL("testing.LoweredFuncsToIRModule")
+.set_body_typed(ToIRModule);
 
 // Export two auxiliary function to the runtime namespace.
 TVM_REGISTER_GLOBAL("runtime.ModulePackImportsToC")

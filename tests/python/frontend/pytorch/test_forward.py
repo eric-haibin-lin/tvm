@@ -351,21 +351,56 @@ def test_forward_adaptiveavgpool():
     verify_model(AdaptiveAvgPool2D1().float().eval(), input_data=input_data)
     verify_model(AdaptiveAvgPool2D2().float().eval(), input_data=input_data)
 
-def test_forward_maxpool():
+def test_forward_maxpool2d():
     torch.set_grad_enabled(False)
     input_shape = [1, 3, 10, 10]
+    input_data = torch.rand(input_shape).float()
 
-    class MaxPool2D1(Module):
-        def forward(self, *args):
-            return torch.nn.MaxPool2d(kernel_size=[1, 1])(args[0])
+    verify_model(torch.nn.MaxPool2d(kernel_size=[1, 1]).eval(),
+                input_data)
+    verify_model(torch.nn.MaxPool2d(kernel_size=[10, 10]).eval(),
+                input_data)
+    verify_model(torch.nn.MaxPool2d(kernel_size=[4, 4],
+                                    padding=2,
+                                    stride=2).eval(),
+                input_data)
 
-    class MaxPool2D2(Module):
+def test_forward_maxpool1d():
+    torch.set_grad_enabled(False)
+    input_shape = [1, 3, 10]
+    input_data = torch.rand(input_shape).float()
+
+    verify_model(torch.nn.MaxPool1d(kernel_size=1).eval(),
+                input_data)
+    verify_model(torch.nn.MaxPool1d(kernel_size=10).eval(),
+                input_data)
+    verify_model( torch.nn.MaxPool1d(kernel_size=4,
+                                    padding=2,
+                                    stride=2).eval(),
+                input_data)
+
+def test_forward_split():
+    torch.set_grad_enabled(False)
+    input_shape = [4, 10]
+
+    class Split(Module):
+        def __init__(self, split_size_or_sections, dim):
+            super(Split, self).__init__()
+            self.split_size_or_sections = split_size_or_sections
+            self.dim = dim
+
         def forward(self, *args):
-            return torch.nn.MaxPool2d(kernel_size=[10, 10])(args[0])
+            return torch.split(args[0], self.split_size_or_sections, self.dim)
 
     input_data = torch.rand(input_shape).float()
-    verify_model(MaxPool2D1().float().eval(), input_data=input_data)
-    verify_model(MaxPool2D2().float().eval(), input_data=input_data)
+    verify_model(Split(2, 0).float().eval(),
+                input_data=input_data)
+    verify_model(Split(3, 1).float().eval(),
+                input_data=input_data)
+    verify_model(Split(4, 1).float().eval(),
+                input_data=input_data)
+    verify_model(Split([2, 3, 5], 1).float().eval(),
+                input_data=input_data)
 
 def test_forward_avgpool():
     torch.set_grad_enabled(False)
@@ -428,7 +463,21 @@ def test_forward_conv():
     input_data = torch.rand(input_shape).float()
     verify_model(Conv2D1().float().eval(), input_data=input_data)
     verify_model(Conv2D2().float().eval(), input_data=input_data)
+    # depth wise conv with channel mult 2
     verify_model(Conv2D3().float().eval(), input_data=input_data)
+    # group conv
+    verify_model(torch.nn.Conv2d(8, 8, kernel_size=(3, 3),
+                                 stride=(1, 1), groups=2).eval(),
+                 input_data=torch.randn((1, 8, 16, 16)))
+
+
+def test_forward_conv_transpose():
+    torch.set_grad_enabled(False)
+    input_shape = [1, 3, 10, 10]
+    input_data = torch.rand(input_shape).float()
+    verify_model(torch.nn.ConvTranspose2d(3, 6, 7, bias=True), input_data=input_data)
+    verify_model(torch.nn.ConvTranspose2d(3, 12, 3, bias=False), input_data=input_data)
+
 
 def test_forward_threshold():
     torch.set_grad_enabled(False)
@@ -1028,9 +1077,11 @@ if __name__ == "__main__":
     test_forward_concatenate()
     test_forward_relu()
     test_forward_adaptiveavgpool()
-    test_forward_maxpool()
+    test_forward_maxpool2d()
+    test_forward_maxpool1d()
     test_forward_hardtanh()
     test_forward_conv()
+    test_forward_conv_transpose()
     test_forward_threshold()
     test_forward_contiguous()
     test_forward_batchnorm()
@@ -1049,6 +1100,7 @@ if __name__ == "__main__":
     test_forward_expand()
     test_forward_pow()
     test_forward_chunk()
+    test_forward_split()
     test_upsample()
     test_to()
     test_adaptive_pool3d()
