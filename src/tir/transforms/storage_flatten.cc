@@ -378,7 +378,7 @@ class StorageFlattener : public StmtExprMutator {
   // - Buffer is declared to have constant shape,
   //   but we try to bind it to a different one.
   // - Buffer is declared to be compact(no strides)
-  //   but this binded region is a subregion of
+  //   but this bound region is a subregion of
   //   a matrix(tensor), which means it requires strides.
   //
   // We do support a few relaxed case, such as bindingx

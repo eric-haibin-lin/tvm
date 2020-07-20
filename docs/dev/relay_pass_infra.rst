@@ -312,17 +312,17 @@ favorably use Python APIs to create a specific pass object.
 
 .. code:: c++
 
-    FunctionPass CreateFunctionPass(std::string name,
+    FunctionPass CreateFunctionPass(PassFunc pass_func,
                                     int opt_level,
-                                    PassFunc pass_func);
+                                    std::string name);
 
-    ModulePass CreateModulePass(std::string name,
+    ModulePass CreateModulePass(PassFunc pass_func,
                                 int opt_level,
-                                PassFunc pass_func);
+                                std::string name);
 
-    SequentialPass CreateSequentialPass(std::string name,
+    SequentialPass CreateSequentialPass(Array<Pass> passes,
                                         int opt_level,
-                                        Array<Pass> passes,
+                                        std::string name,
                                         Array<tvm::Expr> disabled);
 
 C++ Sequential Example

@@ -390,7 +390,7 @@ class Vectorizer : public StmtMutator, public ExprFunctor<PrimExpr(const PrimExp
   // LetStmt
   Stmt VisitStmt_(const LetStmtNode* op) final {
     PrimExpr value = this->VisitExpr(op->value);
-    CHECK(!let_binding_.count(op->var)) << "SSA violation, a single var is binded twice";
+    CHECK(!let_binding_.count(op->var)) << "SSA violation, a single var is bound twice";
     let_binding_[op->var] = value;
 
     if (value.dtype().lanes() != op->value.dtype().lanes()) {
