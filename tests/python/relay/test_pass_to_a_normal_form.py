@@ -96,8 +96,8 @@ def test_if():
     assert tvm.ir.structural_equal(anf, expected_output)
 
 
-# make sure we dont infinite loop.
-# it is too large so we wont check for the exact program.
+# make sure we do not infinitely loop.
+# it is too large so we won't check for the exact program.
 def test_recursion():
     """
     Program:

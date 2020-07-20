@@ -50,7 +50,7 @@ using FAreCompatibleOps = std::function<bool(const CallNode* a, const CallNode* 
 using ExprSubstMap = std::unordered_map<Expr, Expr, ObjectPtrHash, ObjectPtrEqual>;
 
 /*
- * Class to find parallel branches starting with op that are
+ * Class to find parallel branches starting with ops that are
  * grouped if they are able to be combined. They are eligible to
  * be combined if they have the same input data.
  * Op can be followed by zero or more elemwise or broadcast ops,

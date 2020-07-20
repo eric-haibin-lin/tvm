@@ -19,11 +19,11 @@
 
 /*!
  * \file let_list.h
- * \brief LetList record let binding and insert let expression implicitly.
- *  using it, one can treat AST as value instead of expression,
+ * \brief LetList records let binding and inserts let expression implicitly.
+ *  Using it, one can treat AST as value instead of expression,
  *  and pass them around freely without fear of AST explosion (or effect duplication).
- *  for example, if one write 'b = a + a; c = b + b; d = c + c', the AST will contain 8 'a'.
- *  if one instead write 'b = ll.Push(a + a); c = ll.Push(b + b); d = ll.Get(c + c);',
+ *  For example, if one writes 'b = a + a; c = b + b; d = c + c', the AST will contain 8 'a'.
+ *  if one instead writes 'b = ll.Push(a + a); c = ll.Push(b + b); d = ll.Get(c + c);',
  *  the AST will contain 2 'a', as b and c are now variables.
  */
 #ifndef TVM_RELAY_TRANSFORMS_LET_LIST_H_
@@ -45,7 +45,7 @@ namespace relay {
 /*!
  * \brief LetList allow you to transform expression into variables, so you can copy them around.
  *  one can insert into the LetList by calling Push, and wrap an expression with bindings with Get.
- *  additionally, there is the 'With' function, which automatically call Get.
+ *  additionally, there is the 'With' function, which automatically calls Get.
  */
 class LetList {
  public:
