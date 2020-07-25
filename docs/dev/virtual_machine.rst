@@ -333,14 +333,14 @@ Optimizations marked with `TODO` are not implemented yet.
 
 - A-Normal Form
 - Lambda Lift (see `src/relay/vm/lambda_lift.cc`_)
-- Inline Primitives (see `src/relay/vm/inline_primitives.cc`_)
+- Inline Primitives (see `src/relay/backend/vm/inline_primitives.cc`_)
 - Constant Pool Layout (see `src/relay/backend/vm/compiler.cc`_)
 - Tail Call Optimization (TODO)
 - Liveness Analysis (TODO)
 
 .. _src/relay/vm/lambda_lift.cc: https://github.com/apache/incubator-tvm/blob/master/src/relay/backend/vm/lambda_lift.cc
 
-.. _src/relay/vm/inline_primitives.cc: https://github.com/apache/incubator-tvm/blob/master/src/relay/backend/vm/inline_primitives.cc
+.. _src/relay/backend/vm/inline_primitives.cc: https://github.com/apache/incubator-tvm/blob/master/src/relay/backend/vm/inline_primitives.cc
 
 .. _src/relay/backend/vm/compiler.cc: https://github.com/apache/incubator-tvm/blob/master/src/relay/backend/vm/compiler.cc
 
